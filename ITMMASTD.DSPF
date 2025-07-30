@@ -35,7 +35,7 @@
      A                                      COLOR(BLU)
      A                                  5 03'2=Edit, 3=Copy,'
      A                                      COLOR(BLU)
-     A                                  5 19'4=DELETE, 5=DISPLAY'
+     A                                  5 19'4=Delete, 5=Display'
      A                                      COLOR(BLU)
      A                                  6 03'Position to Item No' COLOR(WHT)
      A            POSTO          5S 0B  6 25
@@ -84,10 +84,16 @@
      A            ITMNOU    R        O  6 25REFFLD(ITMNO)
      A                                  7 05'Item Description'
      A            ITMDESCU  R        B  7 25REFFLD(ITMDESC)
+     A  41                                  DSPATR(PC)
+     A  41                                  DSPATR(RI)
      A                                  8 05'Item Quantity'
      A            ITMQTYU   R        B  8 25REFFLD(ITMQTY)
+     A  42                                  DSPATR(PC)
+     A  42                                  DSPATR(RI)
      A                                  9 05'Item Price'
      A            ITMPRICEU R        B  9 25REFFLD(ITMPRICE)
+     A  43                                  DSPATR(PC)
+     A  43                                  DSPATR(RI)
      A          R ITMDSPR                    OVERLAY
      A                                  6 05'Item NO'
      A            ITMNOD    R        O  6 25REFFLD(ITMNO)
@@ -97,3 +103,16 @@
      A            ITMQTYD   R        O  8 25REFFLD(ITMQTY)
      A                                  9 05'Item Price'
      A            ITMPRICED R        O  9 25REFFLD(ITMPRICE)
+     A          R ITMCPYR                    OVERLAY
+     A                                  7 05'Item Description'
+     A            ITMDESCC  R        B  7 25REFFLD(ITMDESC)
+     A  44                                  DSPATR(PC)
+     A  44                                  DSPATR(RI)
+     A                                  8 05'Item Quantity'
+     A            ITMQTYC   R        B  8 25REFFLD(ITMQTY)
+     A  45                                  DSPATR(PC)
+     A  45                                  DSPATR(RI)
+     A                                  9 05'Item Price'
+     A            ITMPRICEC R        B  9 25REFFLD(ITMPRICE)
+     A  46                                  DSPATR(PC)
+     A  46                                  DSPATR(RI)

@@ -35,6 +35,19 @@
             itemDescAddError ind pos(38);
             itemQtyAddError ind pos(39);
             itemPriceAddError ind pos(40);
+            itemDescUpdError ind pos(41);
+            itemQtyUpdError ind pos(42);
+            itemPriceUpdError ind pos(43);
+            itemDescCpyError ind pos(44);
+            itemQtyCpyError ind pos(45);
+            itemPriceCpyError ind pos(46);
+        end-ds;
+
+        dcl-ds deleteConfirm Qualified DIM(100);
+           ITMNO  LIKE(ITMNO);
+           ITMDESC  LIKE(ITMDESC);
+           ITMQTY   LIKE(ITMQTY);
+           ITMPRICE  LIKE(ITMPRICE);
         end-ds;
 
         dcl-ds dsp_fields extname('ITMMASTP') end-ds;
@@ -56,6 +69,7 @@
         dcl-s WK_DESC  LIKE(DESC);
         dcl-s searchPattern CHAR(100);
         dcl-s WK_MaxItemNo  like(ITMNO);
+        dcl-s WK_ItemNo  like(ITMNO);
         Dcl-S Wk_Date Zoned(8:0);
 
         // Start of program logic
@@ -69,22 +83,23 @@
         closeCursor  = False;
 
         dou dspf.exit or dspf.previous;
+
             Select;
             When dspf.refresh or (posto <> *zeros and
                 not dspf.pageup and not dspf.pagedown) OR
                 ((DESC <> *blanks OR WK_DESC <> *BLANKS)
                   and not dspf.pageup and not dspf.pagedown);
 
-                If desc = *blanks and wk_desc <> *blanks;
+                If (desc = *blanks and wk_desc <> *blanks) OR dspf.refresh;
                    closeCursor = True;
                 Endif;
 
                 WK_DESC = DESC;
-
                 clear position;
                 clearSubfile();
                 setPosition();
                 loadSubfile();
+
             When   dspf.pageUp;
                 clear posto;
                 exec sql close mycursor;
@@ -115,14 +130,30 @@
               Enddo;
 
               // Process subfile options
+
               READC  SFL01;
               Dow not %eof();
                 Select;
                 When Opt = '2';
                   LoadEditScreen();
+                  dspf.previous =False;
+                  OPT = *BLANKS;
+                  ITMDESC = ITMDESCU;
+                  ITMQTY = itmqtyu;
+                  ITMPRICE = ITMPRICEU;
+
+
+                When Opt = '3';
+                  LoadCopyScreen();
+                  dspf.previous =False;
+
+                When Opt = '4';
+                  DSPF.REFRESH = *ON;
+                  Exec sql DELETE from ITMMASTP where ITMNO =:ITMNO;
 
                 When Opt = '5';
                   LoadDisplayScreen();
+                  dspf.previous =False;
 
                 Endsl;
 
@@ -132,6 +163,12 @@
               Enddo;
 
             Endsl;
+
+            // Load delete confirmation screen if records are seleted for delete
+            // If deleteConfirm(1).ITMNO  <> *Zeros;
+            //  LoadDeleteConfirmAndDelete();
+            //  dspf.previous =False;
+            // Endif;
 
             showSubfile();
 
@@ -153,7 +190,7 @@
 
             dspf.sflEnd = False;
             rrn = 0;
-
+            OPT=*BLANKS;
             exec sql fetch next from mycursor into :dsp_fields;
 
             previousPosition = ITMNO;
@@ -261,7 +298,10 @@
 
         // Load edit screen
         dcl-proc LoadEditScreen;
-
+            Clear Errormsg1;
+            dspf.itemPriceUpdError =False;
+            dspf.itemDescUpdError  =False;
+            dspf.itemQtyUpdError   =False;
             ITMNOU  =  ITMNO;
             ITMDESCU = ITMDESC ;
             ITMQTYU =  ITMQTY;
@@ -270,6 +310,47 @@
               WRITE FOOTER1;
               WRITE HEADER;
               Exfmt ITMUPDR;
+
+              If dspf.exit or dspf.previous;
+                Return;
+              Endif;
+
+              Clear Errormsg1;
+              dspf.itemPriceUpdError =False;
+              dspf.itemDescUpdError  =False;
+              dspf.itemQtyUpdError   =False;
+
+              If ITMDESCU  = *Blanks;
+                Errormsg1='Please enter Item Description';
+                dspf.itemDescUpdError = True;
+              Endif;
+
+              If ITMQTYU   = *Zeros;
+                Errormsg1='Please enter Item Quantity';
+                dspf.itemQtyUpdError = True;
+              Endif;
+
+              If ITMPRICEU = *Zeros;
+                Errormsg1='Please enter Item Price';
+                dspf.itemPriceUpdError = True;
+              Endif;
+
+              If Errormsg1 = *Blanks;
+
+                Wk_date = %Dec(%Char(%Date():*ISO0):8:0);
+
+                Exec sql update ITMMASTP set ITMDESC = :ITMDESCU,
+                     ITMQTY = :ITMQTYU, ITMPRICE =:ITMPRICEU,
+                     ITMUPDBY = :USER1, ITMUPDON =:Wk_Date,
+                     ITMUPDPGM = :pgm where ITMNO =:ITMNOU;
+
+                     If sqlcod = 0;
+                       Errormsg1 ='Updated successfully';
+                     Else;
+                       Errormsg1 ='Unexpected error. Inform IT team';
+                     Endif;
+
+              Endif;
 
             enddo;
 
@@ -287,6 +368,10 @@
               WRITE HEADER;
               Exfmt ITMDSPR;
 
+              If dspf.exit or dspf.previous;
+                Return;
+              Endif;
+
             enddo;
 
         end-proc;
@@ -300,6 +385,10 @@
               write footer1;
               write header;
               exfmt ITMADDR;
+
+              If dspf.exit or dspf.previous;
+                Return;
+              Endif;
 
               Clear Errormsg1;
               dspf.itemPriceAddError =False;
@@ -321,6 +410,15 @@
                 dspf.itemPriceAddError = True;
               Endif;
 
+              // Validate Duplicate
+              Exec sql select itmno into :WK_ItemNo
+                   from ITMMASTP WHERE UPPER(ITMDESC)
+                 = Trim(UPPER(:ITMDESCA)) limit 1;
+              If sqlcod = 0;
+                Errormsg1='Item already exists';
+                dspf.itemDescAddError = True;
+              Endif;
+
               // Add record if no errors
               If Errormsg1 = *Blanks;
                 // Increment item no
@@ -340,6 +438,85 @@
                     Endif;
                 Else;
                   Errormsg1 ='Unexpected error. Inform IT team';
+                Endif;
+
+              Endif;
+
+
+            Enddo;
+        end-proc;
+
+        // Load Copy screen
+        dcl-proc LoadCopyScreen;
+
+            Clear Errormsg1;
+            ITMDESCC = ITMDESC;
+            ITMQTYC = ITMQTY;
+            ITMPRICEC = ITMPRICE;
+
+            dou dspf.exit or dspf.previous;
+
+              write footer1;
+              write header;
+              exfmt ITMCPYR;
+
+              If dspf.exit or dspf.previous;
+                Return;
+              Endif;
+
+              Clear Errormsg1;
+              dspf.itemPriceCpyError =False;
+              dspf.itemDescCpyError  =False;
+              dspf.itemQtyCpyError   =False;
+
+              If ITMDESCC  = *Blanks;
+                Errormsg1='Please enter Item Description';
+                dspf.itemDescCpyError = True;
+              Endif;
+
+              If ITMQTYC   = *Zeros;
+                Errormsg1='Please enter Item Quantity';
+                dspf.itemQtyCpyError = True;
+              Endif;
+
+              If ITMPRICEC = *Zeros;
+                Errormsg1='Please enter Item Price';
+                dspf.itemPriceCpyError = True;
+              Endif;
+
+              Exec sql select itmno into :WK_ItemNo
+                  from ITMMASTP WHERE UPPER(ITMDESC)
+                 = Trim(UPPER(:ITMDESCC)) limit 1;
+              If sqlcod = 0;
+                Errormsg1='Item already exists';
+                dspf.itemDescCpyError = True;
+              Endif;
+
+              // Add record if no errors
+              If Errormsg1 = *Blanks;
+
+                // Increment item no
+                Exec sql select max(ITMNO) INTO :WK_MaxItemNo from ITMMASTP;
+                If sqlcod = 0;
+
+                   WK_MaxItemNo += 1;
+                   Wk_date = %Dec(%Char(%Date():*ISO0):8:0);
+
+                   Exec sql Insert into ITMMASTP (ITMNO,ITMDESC,ITMQTY,ITMPRICE,
+                    ITMCRTBY, ITMCRTON, ITMUPDBY, ITMUPDON, ITMCRTPGM,ITMUPDPGM)
+                    Values( :WK_MaxItemNo, :ITMDESCC, :ITMQTYC, :ITMPRICEC,
+                            :user1, :wk_date, :user1, :wk_date,
+                            :pgm, :pgm);
+
+                    If sqlcod = 0;
+                      Errormsg1 ='Copied successfully';
+                    Else;
+                      Errormsg1 ='Unexpected error. Inform IT team';
+                    Endif;
+
+                Else;
+                  Errormsg1 ='Unexpected error. Inform IT team';
+
                 Endif;
 
               Endif;
