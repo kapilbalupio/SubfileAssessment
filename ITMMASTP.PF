@@ -1,0 +1,15 @@
+      *   DESCRIPTION: ITEM MASTER FILE
+      *   OBJECT NAME: ITMMASTP
+      *   WRITTEN BY : KAPIL BALU
+     A          R ACCOUNT
+     A            ITMNO          5S 0       COLHDG('ITEM_NO')
+     A            ITMDESC       30A         COLHDG('ITEM_DESC')
+     A            ITMQTY         5S 0       COLHDG('ITEM_QTY')
+     A            ITMPRICE       5S 0       COLHDG('ITEM_PRICE')
+     A            ITMCRTBY      10A         COLHDG('CREATEDBY')
+     A            ITMCRTON       8S 0       COLHDG('CREATEDDATE')
+     A            ITMUPDBY      10A         COLHDG('UPDATEDBY')
+     A            ITMUPDON       8S 0       COLHDG('UPDATEDDATE')
+     A            ITMCRTPGM     10A         COLHDG('CREATEPGM')
+     A            ITMUPDPGM     10A         COLHDG('UPDATEPGM')
+     A          K ITMNO

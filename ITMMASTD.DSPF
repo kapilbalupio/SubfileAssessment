@@ -1,0 +1,99 @@
+      * DESCRIPTION... ITEM MASTER MAINTENANCE DISPLAY FILE
+      * FILE NAME..... ITMMASTD.DSPF
+      * DEVELOPER........ KAPIL BALU
+     A                                      DSPSIZ(27 132 *DS4)
+     A                                      REF(ITMMASTP)
+     A                                      PRINT
+     A                                      INDARA
+     A                                      ERRSFL
+     A                                      HELP(01)
+     A                                      CA03(03)
+     A                                      CA05(05)
+     A                                      CA12(12)
+     A                                      CA06(06)
+     A                                      PAGEUP(25)
+     A                                      PAGEDOWN(26)
+     A          R SFL01                     SFL
+     A  36                                  SFLNXTCHG
+     A            SFLRRN         5S 0H
+     A            OPT            1A  B  8  3
+     A  37                                  DSPATR(PC)
+     A  37                                  DSPATR(RI)
+     A            ITMNO          5S 0O  8  8
+     A            ITMDESC       30A  O  8 19
+     A            ITMQTY         5S 0O  8 53
+     A            ITMPRICE       5S 0O  8 62
+     A          R CTL01                     SFLCTL(SFL01)
+     A                                      SFLSIZ(05)
+     A                                      SFLPAG(05)
+     A                                      OVERLAY
+     A  30                                  SFLDSP
+     A  31                                  SFLDSPCTL
+     A  32                                  SFLCLR
+     A  35                                  SFLEND(*SCRBAR *MORE)
+     A                                  4 03'Type options, press Enter.'
+     A                                      COLOR(BLU)
+     A                                  5 03'2=Edit, 3=Copy,'
+     A                                      COLOR(BLU)
+     A                                  5 19'4=DELETE, 5=DISPLAY'
+     A                                      COLOR(BLU)
+     A                                  6 03'Position to Item No' COLOR(WHT)
+     A            POSTO          5S 0B  6 25
+     A                                  6 32'Search Description' COLOR(WHT)
+     A            DESC          30A  B  6 54
+     A                                  7 03'OPT'  COLOR(WHT)
+     A                                  7 08'Item NO' COLOR(WHT)
+     A                                  7 19'Item Desc'  COLOR(WHT)
+     A                                  7 53'Item Qty'  COLOR(WHT)
+     A                                  7 62'Item Price($)'  COLOR(WHT)
+     A          R HEADER                     OVERLAY
+     A                                  1 49'Item Master Maintenance'
+     A                                      COLOR(WHT)
+     A                                  1 02'System' COLOR(BLU)
+     A                                  1 09SYSNAME
+     A                                  1118'Date'     COLOR(BLU)
+     A                                  1123DATE EDTCDE(Y)
+     A                                  2  2'User' COLOR(BLU)
+     A                                  2 09USER
+     A                                  2118'Time' COLOR(BLU)
+     A                                  2123TIME
+     A          R FOOTER                     OVERLAY
+     A            ERRORMSG     120A  O 26  2COLOR(RED)
+     A                                 25  2'F3=Exit' COLOR(BLU)
+     A                                 25 12'F12=Cancel' COLOR(BLU)
+     A                                 25 25'F6=Add' COLOR(BLU)
+     A          R FOOTER1                    OVERLAY
+     A            ERRORMSG1    120A  O 26  2COLOR(RED)
+     A                                 25  2'F3=Exit' COLOR(BLU)
+     A                                 25 12'F12=Cancel' COLOR(BLU)
+     A          R ITMADDR                    OVERLAY
+     A                                  7 05'Item Description'
+     A            ITMDESCA  R        B  7 25REFFLD(ITMDESC)
+     A  38                                  DSPATR(PC)
+     A  38                                  DSPATR(RI)
+     A                                  8 05'Item Quantity'
+     A            ITMQTYA   R        B  8 25REFFLD(ITMQTY)
+     A  39                                  DSPATR(PC)
+     A  39                                  DSPATR(RI)
+     A                                  9 05'Item Price'
+     A            ITMPRICEA R        B  9 25REFFLD(ITMPRICE)
+     A  40                                  DSPATR(PC)
+     A  40                                  DSPATR(RI)
+     A          R ITMUPDR                    OVERLAY
+     A                                  6 05'Item NO'
+     A            ITMNOU    R        O  6 25REFFLD(ITMNO)
+     A                                  7 05'Item Description'
+     A            ITMDESCU  R        B  7 25REFFLD(ITMDESC)
+     A                                  8 05'Item Quantity'
+     A            ITMQTYU   R        B  8 25REFFLD(ITMQTY)
+     A                                  9 05'Item Price'
+     A            ITMPRICEU R        B  9 25REFFLD(ITMPRICE)
+     A          R ITMDSPR                    OVERLAY
+     A                                  6 05'Item NO'
+     A            ITMNOD    R        O  6 25REFFLD(ITMNO)
+     A                                  7 05'Item Description'
+     A            ITMDESCD  R        O  7 25REFFLD(ITMDESC)
+     A                                  8 05'Item Quantity'
+     A            ITMQTYD   R        O  8 25REFFLD(ITMQTY)
+     A                                  9 05'Item Price'
+     A            ITMPRICED R        O  9 25REFFLD(ITMPRICE)
