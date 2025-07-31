@@ -22,6 +22,7 @@
                         'Content-type: text/plain' + CRLF + CRLF;
                writeToWeb( header : %len(header) : err);
 
-               // dump the message
+               // dump the message AS 
+               //send a response
                greet = 'Hello World';
                WriteToWeb( greet : %len(greet) : err);
