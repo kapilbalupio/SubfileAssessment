@@ -116,3 +116,6 @@
      A            ITMPRICEC R        B  9 25REFFLD(ITMPRICE)
      A  46                                  DSPATR(PC)
      A  46                                  DSPATR(RI)
+     A            ITMPRItes R        B  9 25REFFLD(ITMPRICE)
+     A  46                                  DSPATR(PC)
+     A  46                                  DSPATR(RI)
