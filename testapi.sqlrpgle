@@ -26,3 +26,5 @@
                //send a response
                greet = 'Hello World';
                WriteToWeb( greet : %len(greet) : err);
+
+               // End of program
